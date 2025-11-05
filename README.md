@@ -23,3 +23,7 @@ This script preprocesses multi-view data for 3D reconstruction. It performs the 
 ```bash
 ./preprocess_multipleview.sh /yourdatapath/dynerf/coffee_martini 1
 ```
+
+### Output Location
+
+Upon successful completion, the preprocessed data will be located in a new directory named `<workdir>_4DG`, where `<workdir>` is the input data directory you provided.
