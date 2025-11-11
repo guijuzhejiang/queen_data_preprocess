@@ -128,7 +128,7 @@ def process_video(video_data_save, video_path, img_wh, downsample, transform):
                 video_frame = cv2.cvtColor(video_frame, cv2.COLOR_BGR2RGB)
                 video_frame = Image.fromarray(video_frame)
                 if downsample != 1.0:
-                    
+
                     img = video_frame.resize(img_wh, Image.LANCZOS)
                 img.save(os.path.join(image_path,"%04d.png"%count))
 
@@ -137,19 +137,19 @@ def process_video(video_data_save, video_path, img_wh, downsample, transform):
                 count += 1
             else:
                 break
-      
+
     else:
         images_path = os.listdir(image_path)
         images_path.sort()
-        
+
         for path in images_path:
             img = Image.open(os.path.join(image_path,path))
-            if downsample != 1.0:  
+            if downsample != 1.0:
                 img = img.resize(img_wh, Image.LANCZOS)
                 img = transform(img)
                 video_data_save[count] = img.permute(1,2,0)
                 count += 1
-        
+
     video_frames.release()
     print(f"Video {video_path} processed.")
     return None
@@ -263,20 +263,20 @@ class Neural3D_NDC_Dataset(Dataset):
         """
         # Read poses and video file paths.
         #(N_cams, 17)，前15个元素是3×5的相机姿态矩阵，最后2个元素是近远平面距离
-        poses_arr = np.load(os.path.join(self.root_dir, "poses_bounds.npy"))
+        # poses_arr = np.load(os.path.join(self.root_dir, "poses_bounds.npy"))
         #提取的相机姿态矩阵，形状：(N_cams, 3, 5)，包含旋转矩阵、平移向量和相机内参
-        poses = poses_arr[:, :-2].reshape([-1, 3, 5])  # (N_cams, 3, 5)
+        # poses = poses_arr[:, :-2].reshape([-1, 3, 5])  # (N_cams, 3, 5)
         #定义每个相机视角下的可见深度范围，用于射线生成和体积渲染
-        self.near_fars = poses_arr[:, -2:]
+        # self.near_fars = poses_arr[:, -2:]
         videos = glob.glob(os.path.join(self.root_dir, "cam*.mp4"))
         videos = sorted(videos)
         # breakpoint()
-        assert len(videos) == poses_arr.shape[0]
+        # assert len(videos) == poses_arr.shape[0]
         # 相机焦距，定义相机内参，用于将3D点投影到图像平面
-        H, W, focal = poses[0, :, -1]   ## 从姿态矩阵提取
-        focal = focal / self.downsample ## 根据下采样调整
-        self.focal = [focal, focal] # x和y方向焦距
-        poses = np.concatenate([poses[..., 1:2], -poses[..., :1], poses[..., 2:4]], -1)
+        # H, W, focal = poses[0, :, -1]   ## 从姿态矩阵提取
+        # focal = focal / self.downsample ## 根据下采样调整
+        # self.focal = [focal, focal] # x和y方向焦距
+        # poses = np.concatenate([poses[..., 1:2], -poses[..., :1], poses[..., 2:4]], -1)
         # poses, _ = center_poses(
         #     poses, self.blender2opencv
         # )  # Re-center poses so that the average is near the center.
@@ -290,18 +290,18 @@ class Neural3D_NDC_Dataset(Dataset):
 
         # Sample N_views poses for validation - NeRF-like camera trajectory.
         #螺旋轨迹的视角数量，生成的验证视角数量，控制生成的螺旋相机路径中包含的视角数量
-        N_views = 300
+        # N_views = 300
         #生成NeRF风格的螺旋相机轨迹用于验证
-        self.val_poses = get_spiral(poses, self.near_fars, N_views=N_views)
+        # self.val_poses = get_spiral(poses, self.near_fars, N_views=N_views)
         # self.val_poses = self.directions
-        W, H = self.img_wh
-        poses_i_train = []
-
-        for i in range(len(poses)):
-            if i != self.eval_index:
-                poses_i_train.append(i)
-        self.poses = poses[poses_i_train]
-        self.poses_all = poses
+        # W, H = self.img_wh
+        # poses_i_train = []
+        #
+        # for i in range(len(poses)):
+        #     if i != self.eval_index:
+        #         poses_i_train.append(i)
+        # self.poses = poses[poses_i_train]
+        # self.poses_all = poses
         self.image_paths, self.image_poses, self.image_times, N_cam, N_time = self.load_images_path(videos, self.split)
         self.cam_number = N_cam
         self.time_number = N_time
@@ -317,7 +317,7 @@ class Neural3D_NDC_Dataset(Dataset):
         N_time = 0
         countss = 300
         for index, video_path in enumerate(videos):
-            
+
             if index == self.eval_index:
                 if split =="train":
                     continue
@@ -349,24 +349,24 @@ class Neural3D_NDC_Dataset(Dataset):
                         this_count+=1
                     else:
                         break
-                    
+
             images_path = os.listdir(image_path)
             images_path.sort()
-            this_count = 0
-            for idx, path in enumerate(images_path):
-                if this_count >=countss:break
-                image_paths.append(os.path.join(image_path,path))
-                pose = np.array(self.poses_all[index])
-                R = pose[:3,:3]
-                R = -R
-                R[:,0] = -R[:,0]
-                T = -pose[:3,3].dot(R)
-                image_times.append(idx/countss)
-                image_poses.append((R,T))
-                # if self.downsample != 1.0:
-                #     img = video_frame.resize(self.img_wh, Image.LANCZOS)
-                # img.save(os.path.join(image_path,"%04d.png"%count))
-                this_count+=1
+            # this_count = 0
+            # for idx, path in enumerate(images_path):
+            #     if this_count >=countss:break
+            #     image_paths.append(os.path.join(image_path,path))
+            #     pose = np.array(self.poses_all[index])
+            #     R = pose[:3,:3]
+            #     R = -R
+            #     R[:,0] = -R[:,0]
+            #     T = -pose[:3,3].dot(R)
+            #     image_times.append(idx/countss)
+            #     image_poses.append((R,T))
+            #     # if self.downsample != 1.0:
+            #     #     img = video_frame.resize(self.img_wh, Image.LANCZOS)
+            #     # img.save(os.path.join(image_path,"%04d.png"%count))
+            #     this_count+=1
             N_time = len(images_path)
 
                 #     video_data_save[count] = img.permute(1,2,0)
