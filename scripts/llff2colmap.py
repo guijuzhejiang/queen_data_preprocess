@@ -98,8 +98,7 @@ H, W, focal = poses[0, :, -1]
 focal = focal/2
 focal = [focal, focal]
 poses = np.concatenate([poses[..., 1:2], -poses[..., :1], poses[..., 2:4]], -1)
-videos = glob.glob(os.path.join(root_dir, "cam[0-9][0-9]"))
-videos = sorted(videos)
+
 image_paths = []
 for index, video_path in enumerate(videos):
     image_path = os.path.join(video_path,"images","0000.png")
@@ -139,7 +138,9 @@ for idx, pose in enumerate(poses):
 
 # write camera infomation.
 object_cameras_file = open(os.path.join(colmap_dir,"cameras.txt"),"w")
-print(1,"SIMPLE_PINHOLE",1352,1014,focal[0],1352/2,1014/2,file=object_cameras_file) # 
+width = int(W/2)    #1352, 1920
+height = int(H/2)   #1014, 1080
+print(1,"SIMPLE_PINHOLE",width,height,focal[0],width/2,height/2,file=object_cameras_file) #
 object_point_file = open(os.path.join(colmap_dir,"points3D.txt"),"w")
 
 object_cameras_file.close()

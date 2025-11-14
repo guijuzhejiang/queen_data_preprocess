@@ -228,13 +228,18 @@ class Neural3D_NDC_Dataset(Dataset):
         eval_index=0,
         sphere_scale=1.0,
     ):
-        self.img_wh = (
-            int(1352 / downsample),
-            int(1014 / downsample),
-        )  # According to the neural 3D paper, the default resolution is 1024x768
         self.root_dir = datadir
         self.split = split
-        self.downsample = 2704 / self.img_wh[0]
+        self.eval_index = eval_index
+        videos = [os.path.join(self.root_dir, f) for f in os.listdir(self.root_dir) if f.endswith(".mp4")]
+        H, W = self.load_images_path(videos, self.split, get_HW=True)
+        height, width = H/2, W/2
+        self.img_wh = (
+            int(width / downsample),
+            int(height / downsample),
+        )  # According to the neural 3D paper, the default resolution is 1024x768
+
+        self.downsample = 2*width / self.img_wh[0]
         self.is_stack = is_stack
         self.N_vis = N_vis
         self.time_scale = time_scale
@@ -243,7 +248,6 @@ class Neural3D_NDC_Dataset(Dataset):
         self.world_bound_scale = 1.1
         self.bd_factor = bd_factor
         self.eval_step = eval_step
-        self.eval_index = eval_index
         self.blender2opencv = np.eye(4)
         self.transform = T.ToTensor()
 
@@ -309,7 +313,7 @@ class Neural3D_NDC_Dataset(Dataset):
         render_poses = self.val_poses
         render_times = torch.linspace(0.0, 1.0, render_poses.shape[0]) * 2.0 - 1.0
         return render_poses, self.time_scale * render_times
-    def load_images_path(self,videos,split):
+    def load_images_path(self,videos,split,get_HW=False):
         image_paths = []
         image_poses = []
         image_times = []
@@ -335,6 +339,9 @@ class Neural3D_NDC_Dataset(Dataset):
                 this_count = 0
                 while video_frames.isOpened():
                     ret, video_frame = video_frames.read()
+                    if get_HW:
+                        H, W = video_frame.shape[:2]
+                        return H, W
                     if this_count >= countss:break
                     if ret:
                         video_frame = cv2.cvtColor(video_frame, cv2.COLOR_BGR2RGB)
