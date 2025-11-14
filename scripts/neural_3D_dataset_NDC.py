@@ -231,7 +231,8 @@ class Neural3D_NDC_Dataset(Dataset):
         self.root_dir = datadir
         self.split = split
         self.eval_index = eval_index
-        videos = [os.path.join(self.root_dir, f) for f in os.listdir(self.root_dir) if f.endswith(".mp4")]
+        videos = glob.glob(os.path.join(self.root_dir, "cam*.mp4"))
+        videos = sorted(videos)
         H, W = self.load_images_path(videos, self.split, get_HW=True)
         height, width = H/2, W/2
         self.img_wh = (
@@ -334,8 +335,9 @@ class Neural3D_NDC_Dataset(Dataset):
             image_path = os.path.join(video_images_path,"images")
             video_frames = cv2.VideoCapture(video_path)
             if not os.path.exists(image_path):
-                print(f"no images saved in {image_path}, extract images from video.")
-                os.makedirs(image_path)
+                if not get_HW:
+                    print(f"no images saved in {image_path}, extract images from video.")
+                    os.makedirs(image_path)
                 this_count = 0
                 while video_frames.isOpened():
                     ret, video_frame = video_frames.read()
