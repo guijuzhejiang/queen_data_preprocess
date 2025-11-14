@@ -1,5 +1,13 @@
 # queen_data_preprocess
 
+### Activate conda environment
+
+Before running the script, ensure that you have activated the `queen` conda environment. This will ensure that all necessary dependencies are available.
+
+```bash
+conda activate queen
+```
+
 ## How to use `download2render.sh`
 
 This script automates the entire pipeline for data preprocessing, training, and rendering. It performs the following steps:
@@ -20,9 +28,12 @@ This script automates the entire pipeline for data preprocessing, training, and 
 ### Example
 
 ```bash
-./download2render.sh /yourdatapath/dynerf 0
+cd yourcodepath/queen
+./queen_data_preprocess/download2render.sh /yourdatapath 0
 ```
 
 ### Output Location
 
 Upon successful completion, the trained model and rendering results will be located in the `./output/<dataset_name>_trained` directory within your project root.
+
+To download other datasets, modify the `URL` variable in the `download2render.sh` script.
